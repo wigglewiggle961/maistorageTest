@@ -47,19 +47,15 @@ ollama list
 Run these commands to download the three required models:
 
 ```powershell
-# Primary LLM (~3.3 GB — requires 6 GB VRAM)
-ollama pull gemma3:4b
+# Primary LLM with native vision (~5 GB — requires 6 GB VRAM)
+ollama pull gemma4:e4b
 
 # Embedding model (~274 MB)
 ollama pull nomic-embed-text
-
-# Vision model for image summarization at ingest time (~4.7 GB)
-# Note: llava is only used during document ingestion, not at query time
-ollama pull llava
 ```
 
-> **VRAM note:** gemma3:4b and llava cannot both fit in 6 GB VRAM simultaneously.
-> The ingestion pipeline uses llava then unloads it. Query time uses only gemma3:4b.
+> **VRAM note:** `gemma4:e4b` handles both text generation and image understanding natively.
+> No separate vision model is needed — a single `ollama pull` gets everything.
 
 ---
 
@@ -116,13 +112,12 @@ Expected output when all models are ready:
 Ollama endpoint: http://localhost:11434
 Checking Ollama connection...
 
-  Found 3 model(s) pulled on this machine.
+  Found 2 model(s) pulled on this machine.
 
 Verifying required models:
 ------------------------------------------------
-  ✓ gemma3:4b — chat response OK
+  ✓ gemma4:e4b — chat response OK
   ✓ nomic-embed-text — embedding OK (768 dims)
-  ✓ llava — chat response OK
 ------------------------------------------------
 
 All models verified. Environment ready.
@@ -140,8 +135,8 @@ Build the ChromaDB vector store from the `documents/` corpus:
 python scripts/ingest.py
 ```
 
-> **First run:** Ingestion takes 10–30 minutes (image summarization with llava is slow).
-> Subsequent runs are fast — the pipeline is idempotent (no duplicate chunks created).
+> **First run:** Ingestion takes 5–20 minutes (image understanding uses `gemma4:e4b`'s
+> native vision — no llava required).
 
 ### Step 2: Launch the Demo
 
@@ -186,9 +181,9 @@ See `.env.example` for all available settings:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama API endpoint |
-| `LLM_MODEL` | `gemma3:4b` | LLM for generation and routing |
+| `LLM_MODEL` | `gemma4:e4b` | LLM for generation, routing, and vision |
 | `EMBED_MODEL` | `nomic-embed-text` | Embedding model |
-| `VISION_MODEL` | `llava` | Vision model (ingest only) |
+| `VISION_MODEL` | `gemma4:e4b` | Vision model — same as LLM (native multimodal) |
 | `TOP_K` | `5` | Number of chunks to retrieve |
 | `MAX_RETRIES` | `3` | Max re-retrieval attempts |
 
@@ -224,8 +219,8 @@ ollama serve
 
 **GPU out of memory:**
 
-Do not run gemma3:4b and llava at the same time. The ingest pipeline handles this
-automatically — it unloads llava after image summarization before loading gemma3:4b.
+`gemma4:e4b` is the only large model used. If you see OOM errors, verify no other large
+models are loaded: `ollama ps`. Stop unused models with `ollama stop <model>`.
 
 **ChromaDB errors on re-run:**
 

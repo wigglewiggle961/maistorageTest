@@ -22,11 +22,14 @@ from config import EMBED_MODEL, LLM_MODEL, OLLAMA_BASE_URL, VISION_MODEL
 # Configure ollama client to use the configured base URL
 os.environ.setdefault("OLLAMA_HOST", OLLAMA_BASE_URL)
 
-REQUIRED_MODELS: dict[str, str] = {
-    LLM_MODEL: "chat",        # gemma3:4b — primary LLM
+# Build unique model set (LLM_MODEL and VISION_MODEL may be the same model)
+_ALL_MODELS: dict[str, str] = {
+    LLM_MODEL: "chat",        # gemma4:e4b — primary LLM with native vision
     EMBED_MODEL: "embed",     # nomic-embed-text — embeddings
-    VISION_MODEL: "chat",     # llava — vision at ingest time
+    VISION_MODEL: "chat",     # gemma4:e4b — vision at ingest time (same model)
 }
+# Deduplicate: if LLM_MODEL == VISION_MODEL, verify it once as 'chat'
+REQUIRED_MODELS: dict[str, str] = _ALL_MODELS
 
 
 def check_model_pulled(model_name: str, available_names: list[str]) -> bool:
