@@ -32,7 +32,8 @@ This phase produces the data layer that every subsequent phase (retrieval, evalu
 - **D-08:** **Recurse into all subdirectories** of `documents/media/`. This includes:
   `agent-identity/`, `memory/`, `monitoring/`, `quickstart/`, `tool-catalog/`, `tools/`.
   All `.png`, `.jpg`, `.jpeg`, `.gif`, `.webp` files found anywhere under `documents/media/` are summarized.
-- **D-09:** Each image chunk metadata: `source` (relative path from project root), `type: image_summary`.
+- **D-09:** Each image chunk metadata: `source` (relative path from project root, e.g. `documents/media/runtime-components.png`), `type: image_summary`, `section_header` (use the image filename stem, e.g. `runtime-components` — this becomes the citation label in the UI), `chunk_index: 0` (one chunk per image).
+  - **Citation path requirement:** The `source` field MUST be the actual image file path so the generation node can cite it correctly. When a retrieved chunk has `type: image_summary`, downstream agents (Phase 3 generation node, Phase 4 UI) will display the image path as the citation source instead of a markdown section header. This is the mechanism that satisfies the citations bonus point for image-derived answers.
 
 ### Embedding Model
 - **D-10 (updated):** Use `qwen3-embedding:0.6b` via Ollama for all chunk embeddings (NOT nomic-embed-text). Already pulled. `src/config.py` `EMBED_MODEL` is already updated to `"qwen3-embedding:0.6b"`.
