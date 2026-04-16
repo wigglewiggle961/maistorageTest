@@ -36,6 +36,19 @@
 
 ---
 
+## Embedding Model
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| qwen3-embedding:0.6b | Qwen3 embed; already pulled by user (~639 MB) | ✓ |
+| nomic-embed-text | Was in original roadmap (~274 MB) | |
+
+**User's choice:** `qwen3-embedding:0.6b` — user had already pulled it in Ollama before this discussion.
+
+**Notes:** `src/config.py`, `.env.example`, `README.md`, `ROADMAP.md`, `REQUIREMENTS.md`, and `PROJECT.md` all updated from `nomic-embed-text` to `qwen3-embedding:0.6b`. Historical Phase 1 plan/research artifacts left untouched (they are read-only audit records).
+
+---
+
 ## Image Processing Scope
 
 | Option | Description | Selected |

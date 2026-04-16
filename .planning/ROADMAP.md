@@ -15,13 +15,13 @@
 ### Plans
 
 1. Initialize Python project structure — Create `src/`, `tests/`, `data/`, `docs/` layout; set up `pyproject.toml` or `requirements.txt` with all dependencies pinned (LangGraph, langchain, chromadb, streamlit, ragas, ollama-python)
-2. Ollama model verification script — Write a `scripts/verify_models.py` script that confirms `gemma3:4b`, `nomic-embed-text`, and `llava` are pulled and responsive via Ollama API
+2. Ollama model verification script — Write a `scripts/verify_models.py` script that confirms `gemma3:4b`, `qwen3-embedding:0.6b`, and `gemma4:e4b` are pulled and responsive via Ollama API
 3. Docker Compose scaffold — Create `docker-compose.yml` with `ollama` and `app` service definitions (GPU passthrough for Ollama); app service mounts the project directory
 4. README.md — Write setup instructions covering: install Ollama, pull models, install Python deps, run ingestion, run app
 
 ### Success Criteria
 
-1. Running `python scripts/verify_models.py` prints successful ping responses from all three Ollama models (gemma3:4b, nomic-embed-text, llava)
+1. Running `python scripts/verify_models.py` prints successful ping responses from all three Ollama models (gemma4:e4b, qwen3-embedding:0.6b)
 2. `docker-compose.yml` exists and passes `docker compose config` validation
 3. A new developer can set up the project from scratch following README.md with no undocumented steps
 
@@ -38,7 +38,7 @@
 1. Markdown loader & recursive chunker — Use LangChain's `UnstructuredMarkdownLoader` or `MarkdownHeaderTextSplitter` to split all `.md` files in `documents/` respecting headers, code blocks, and tables; attach metadata (source path, section header, chunk index)
 2. Image summarization at ingest — For each image in `documents/media/` (recursively, including all subdirectories), call `gemma4:e4b` via Ollama to generate a text summary; create a `Document` chunk with the summary text and metadata (`source: media/filename.png`, `type: image_summary`)
 3. FAQ evaluation dataset builder — Parse `documents/faq.yml` and `documents/concepts/foundry-iq-faq.yml`; for each Q&A pair, retrieve the most relevant markdown chunks and cross-verify the YAML answer matches source doc content; save the verified Q&A pairs to `data/eval_dataset.json`
-4. Embedding & ChromaDB persistence — Embed all chunks using `nomic-embed-text` via Ollama; upsert into a persistent ChromaDB collection with deduplication (using chunk content hash as ID); expose a `VectorStore` wrapper class
+4. Embedding & ChromaDB persistence — Embed all chunks using `qwen3-embedding:0.6b` via Ollama; upsert into a persistent ChromaDB collection with deduplication (using chunk content hash as ID); expose a `VectorStore` wrapper class
 5. Ingestion CLI — `python scripts/ingest.py` runs the full pipeline end-to-end with progress logging; idempotent (re-run safe)
 
 ### Success Criteria
@@ -86,7 +86,7 @@
 1. Streamlit app scaffold — Create `app.py` with page config, chat input widget, and session state for conversation history
 2. Answer + citations display — Render the agent's answer in the main chat column; below the answer, show an expandable "Sources" section listing retrieved chunk excerpts with source file and section
 3. Agent reasoning trace — Show an expandable "Agent Steps" panel displaying which nodes fired (route → retrieve → grade → generate → [hallucination check] → [rewrite → retrieve again]) so the demo reviewer can see the agentic flow in action
-4. Streamlit UX polish — Add a sidebar with: project title, model info (gemma3:4b, nomic-embed-text), corpus info (N chunks indexed), and a "Re-index corpus" button that triggers `ingest.py`
+4. Streamlit UX polish — Add a sidebar with: project title, model info (gemma4:e4b, qwen3-embedding:0.6b), corpus info (N chunks indexed), and a "Re-index corpus" button that triggers `ingest.py`
 
 ### Success Criteria
 
@@ -129,7 +129,7 @@
 ### Plans
 
 1. Research writeup — `docs/research.md`: explain Traditional RAG (fixed retrieve → generate pipeline) vs Agentic RAG (LangGraph graph with grading, hallucination checking, re-retrieval); discuss why agentic approaches improve accuracy for complex or ambiguous queries
-2. System design discussion — `docs/system-design.md`: document the LangGraph node-by-node design decisions, chunking strategy rationale, model selection rationale (gemma3:4b, nomic-embed-text, llava), and ChromaDB vs alternatives
+2. System design discussion — `docs/system-design.md`: document the LangGraph node-by-node design decisions, chunking strategy rationale, model selection rationale (gemma4:e4b, qwen3-embedding:0.6b), and ChromaDB vs alternatives
 3. QA methodology writeup — `docs/qa-methodology.md`: explain the RAGAS metric selection (what each metric measures and why it matters for RAG quality), the FAQ dataset construction process (cross-verification against source docs), the baseline comparison approach, and known limitations
 4. Update README.md — Add links to all docs, add a "Evaluation Results Summary" section with the key RAGAS metric outcomes
 

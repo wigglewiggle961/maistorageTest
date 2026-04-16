@@ -20,7 +20,7 @@ A RAG agent that accurately retrieves grounded answers from the Azure AI Foundry
 
 - [ ] Document ingestion pipeline processes all markdown files in `documents/` with recursive, markdown-aware chunking
 - [ ] Image files in `documents/media/` are summarized using a vision model (llava via Ollama) and stored as text chunks
-- [ ] Embeddings generated with `nomic-embed-text` via Ollama and stored in a persistent ChromaDB vector store
+- [ ] Embeddings generated with `qwen3-embedding:0.6b` via Ollama and stored in a persistent ChromaDB vector store
 - [ ] LangGraph agentic flow orchestrates: query routing → retrieval → relevance grading → generation → hallucination check → re-retrieval if needed
 - [ ] LLM generation uses `gemma3:4b` via Ollama (fits in 6 GB VRAM)
 - [ ] FAQ Q&A pairs from `documents/faq.yml` and `concepts/foundry-iq-faq.yml` are validated against source documents and used as the evaluation dataset
@@ -48,7 +48,7 @@ A RAG agent that accurately retrieves grounded answers from the Azure AI Foundry
 
 ## Constraints
 
-- **Hardware:** RTX 3060 Laptop 6 GB VRAM — all models must fit (gemma3:4b ~3.3 GB, nomic-embed-text ~274 MB, llava for ingest only)
+- **Hardware:** RTX 3060 Laptop 6 GB VRAM — all models must fit (gemma4:e4b ~5 GB, qwen3-embedding:0.6b ~639 MB)
 - **Tech Stack:** Python, LangGraph, ChromaDB, Ollama, Streamlit — no cloud dependencies at runtime
 - **Scope:** Single-milestone assessment deliverable — working prototype + demo + docs + QA explanation
 - **Corpus:** Static `documents/` folder; no live web scraping or API fetching of Azure docs
@@ -58,10 +58,10 @@ A RAG agent that accurately retrieves grounded answers from the Azure AI Foundry
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | gemma3:4b as primary LLM | Strong instruction-following in 4B class, fits in 6 GB VRAM, available via Ollama | — Pending |
-| `gemma4:e4b` for image summarization at ingest time | Handles vision natively; no separate llava model needed; fits in 6 GB VRAM alongside nomic-embed-text | ✓ Confirmed Phase 2 |
+| `gemma4:e4b` for image summarization at ingest time | Handles vision natively; no separate llava model needed; fits in 6 GB VRAM alongside qwen3-embedding:0.6b | ✓ Confirmed Phase 2 |
 | LangGraph for agentic flow | Explicit graph-based control over retrieval loop (grade → re-retrieve → generate) gives fine-grained observability | — Pending |
 | ChromaDB for vector store | Developer has prior experience; local persistence, no server needed | — Pending |
-| nomic-embed-text for embeddings | State-of-the-art open embedding model, Ollama-native | — Pending |
+| `qwen3-embedding:0.6b` for embeddings | Qwen3 embedding model; Ollama-native; already pulled | ✓ Confirmed Phase 2 |
 | Streamlit for demo UI | Python-native, Docker-friendly, no JS required, fast to build and polish | — Pending |
 | Recursive markdown-aware chunking | Respects document structure (headers, code blocks); reduces context noise vs fixed-size chunks | — Pending |
 | FAQ Q&A cross-verified against docs | Ensures ground truth is faithful to actual documents, not summary-level YAML answers | — Pending |

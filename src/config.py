@@ -25,7 +25,7 @@ EVAL_RESULTS_PATH = DATA_DIR / "eval_results.json"
 # ---------------------------------------------------------------------------
 OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 LLM_MODEL: str = os.getenv("LLM_MODEL", "gemma4:e4b")
-EMBED_MODEL: str = os.getenv("EMBED_MODEL", "nomic-embed-text")
+EMBED_MODEL: str = os.getenv("EMBED_MODEL", "qwen3-embedding:0.6b")
 # gemma4:e4b handles vision natively — no separate vision model needed
 VISION_MODEL: str = os.getenv("VISION_MODEL", "gemma4:e4b")
 

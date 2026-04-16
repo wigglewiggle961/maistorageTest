@@ -50,8 +50,8 @@ Run these commands to download the three required models:
 # Primary LLM with native vision (~5 GB — requires 6 GB VRAM)
 ollama pull gemma4:e4b
 
-# Embedding model (~274 MB)
-ollama pull nomic-embed-text
+# Embedding model (~639 MB)
+ollama pull qwen3-embedding:0.6b
 ```
 
 > **VRAM note:** `gemma4:e4b` handles both text generation and image understanding natively.
@@ -117,7 +117,7 @@ Checking Ollama connection...
 Verifying required models:
 ------------------------------------------------
   ✓ gemma4:e4b — chat response OK
-  ✓ nomic-embed-text — embedding OK (768 dims)
+  ✓ qwen3-embedding:0.6b — embedding OK (1024 dims)
 ------------------------------------------------
 
 All models verified. Environment ready.
@@ -182,7 +182,7 @@ See `.env.example` for all available settings:
 |----------|---------|-------------|
 | `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama API endpoint |
 | `LLM_MODEL` | `gemma4:e4b` | LLM for generation, routing, and vision |
-| `EMBED_MODEL` | `nomic-embed-text` | Embedding model |
+| `EMBED_MODEL` | `qwen3-embedding:0.6b` | Embedding model |
 | `VISION_MODEL` | `gemma4:e4b` | Vision model — same as LLM (native multimodal) |
 | `TOP_K` | `5` | Number of chunks to retrieve |
 | `MAX_RETRIES` | `3` | Max re-retrieval attempts |

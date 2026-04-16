@@ -34,22 +34,25 @@ This phase produces the data layer that every subsequent phase (retrieval, evalu
   All `.png`, `.jpg`, `.jpeg`, `.gif`, `.webp` files found anywhere under `documents/media/` are summarized.
 - **D-09:** Each image chunk metadata: `source` (relative path from project root), `type: image_summary`.
 
+### Embedding Model
+- **D-10 (updated):** Use `qwen3-embedding:0.6b` via Ollama for all chunk embeddings (NOT nomic-embed-text). Already pulled. `src/config.py` `EMBED_MODEL` is already updated to `"qwen3-embedding:0.6b"`.
+
 ### FAQ Evaluation Dataset Verification
-- **D-10:** Use a **simple chunk-overlap / text-similarity heuristic** to cross-verify YAML answers against source markdown chunks — NOT an LLM call. A YAML answer is "verified" if its key terms appear with meaningful overlap in the top-k retrieved chunks for that question.
-- **D-11:** Pairs that fail the heuristic are **flagged** (marked `"verified": false`) rather than dropped — the user may manually curate/correct them. The output `data/eval_dataset.json` includes both verified and flagged pairs so the user can review.
-- **D-12:** Evaluation dataset schema per entry: `{ "question": str, "ground_truth": str, "source_chunks": [str], "verified": bool }`.
+- **D-11:** Use a **simple chunk-overlap / text-similarity heuristic** to cross-verify YAML answers against source markdown chunks — NOT an LLM call. A YAML answer is "verified" if its key terms appear with meaningful overlap in the top-k retrieved chunks for that question.
+- **D-12:** Pairs that fail the heuristic are **flagged** (marked `"verified": false`) rather than dropped — the user may manually curate/correct them. The output `data/eval_dataset.json` includes both verified and flagged pairs so the user can review.
+- **D-13:** Evaluation dataset schema per entry: `{ "question": str, "ground_truth": str, "source_chunks": [str], "verified": bool }`.
 
 ### VectorStore Wrapper
-- **D-13 (Agent's Discretion):** Thin wrapper class — expose only what downstream phases need:
+- **D-14 (Agent's Discretion):** Thin wrapper class — expose only what downstream phases need:
   - `similarity_search(query: str, k: int) -> List[Document]` — used by the retrieval node (Phase 3)
   - `add_documents(docs: List[Document]) -> None` — used during ingestion
   - `collection_stats() -> dict` — used by the Streamlit sidebar (Phase 4) to show chunk counts
   No filtering, update, or delete capabilities needed for v1.
 
 ### Ingestion CLI
-- **D-14:** `scripts/ingest.py` runs the full pipeline end-to-end: markdown chunking → image summarization → embedding → ChromaDB upsert → FAQ dataset build.
-- **D-15:** Idempotent via content-hash deduplication: `chunk_id = sha256(chunk_text + source_path)`. ChromaDB `upsert` by ID prevents duplicates.
-- **D-16:** Progress logging to stdout: chunk counts per doc, total markdown chunks, total image summary chunks, total FAQ pairs (verified vs flagged).
+- **D-15:** `scripts/ingest.py` runs the full pipeline end-to-end: markdown chunking → image summarization → embedding → ChromaDB upsert → FAQ dataset build.
+- **D-16:** Idempotent via content-hash deduplication: `chunk_id = sha256(chunk_text + source_path)`. ChromaDB `upsert` by ID prevents duplicates.
+- **D-17:** Progress logging to stdout: chunk counts per doc, total markdown chunks, total image summary chunks, total FAQ pairs (verified vs flagged).
 
 ### Agent's Discretion
 - Exact prompt wording for image summarization (what to ask `gemma4:e4b` to describe)

@@ -25,7 +25,7 @@ os.environ.setdefault("OLLAMA_HOST", OLLAMA_BASE_URL)
 # Build unique model set (LLM_MODEL and VISION_MODEL may be the same model)
 _ALL_MODELS: dict[str, str] = {
     LLM_MODEL: "chat",        # gemma4:e4b — primary LLM with native vision
-    EMBED_MODEL: "embed",     # nomic-embed-text — embeddings
+    EMBED_MODEL: "embed",     # qwen3-embedding:0.6b — embeddings
     VISION_MODEL: "chat",     # gemma4:e4b — vision at ingest time (same model)
 }
 # Deduplicate: if LLM_MODEL == VISION_MODEL, verify it once as 'chat'
