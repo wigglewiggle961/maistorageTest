@@ -36,7 +36,7 @@
 ### Plans
 
 1. Markdown loader & recursive chunker — Use LangChain's `UnstructuredMarkdownLoader` or `MarkdownHeaderTextSplitter` to split all `.md` files in `documents/` respecting headers, code blocks, and tables; attach metadata (source path, section header, chunk index)
-2. Image summarization at ingest — For each image in `documents/media/`, call llava via Ollama to generate a text summary; create a `Document` chunk with the summary text and metadata (`source: media/filename.png`, `type: image_summary`)
+2. Image summarization at ingest — For each image in `documents/media/` (recursively, including all subdirectories), call `gemma4:e4b` via Ollama to generate a text summary; create a `Document` chunk with the summary text and metadata (`source: media/filename.png`, `type: image_summary`)
 3. FAQ evaluation dataset builder — Parse `documents/faq.yml` and `documents/concepts/foundry-iq-faq.yml`; for each Q&A pair, retrieve the most relevant markdown chunks and cross-verify the YAML answer matches source doc content; save the verified Q&A pairs to `data/eval_dataset.json`
 4. Embedding & ChromaDB persistence — Embed all chunks using `nomic-embed-text` via Ollama; upsert into a persistent ChromaDB collection with deduplication (using chunk content hash as ID); expose a `VectorStore` wrapper class
 5. Ingestion CLI — `python scripts/ingest.py` runs the full pipeline end-to-end with progress logging; idempotent (re-run safe)
@@ -61,8 +61,8 @@
 
 1. LangGraph graph definition — Define the state schema (`AgentState`) and graph structure with nodes: `route_query`, `retrieve`, `grade_documents`, `generate`, `check_hallucination`, `rewrite_query`; define conditional edges for the re-retrieval loop (max retries configurable)
 2. Query router node — Classify incoming query as `answerable` (route to retrieval) or `out_of_scope` (return a graceful "I can only answer questions about Azure AI Foundry Agent Service" message)
-3. Retrieval & grading nodes — `retrieve` fetches top-k chunks from ChromaDB; `grade_documents` calls gemma3:4b with a relevance prompt and filters chunks below threshold
-4. Generation node — `generate` calls gemma3:4b with retrieved context + system prompt to produce a grounded answer; formats citations from chunk metadata
+3. Retrieval & grading nodes — `retrieve` fetches top-k chunks from ChromaDB; `grade_documents` calls gemma4:e4b with a relevance prompt and filters chunks below threshold
+4. Generation node — `generate` calls gemma4:e4b with retrieved context + system prompt to produce a grounded answer; formats citations from chunk metadata
 5. Hallucination checker & rewrite node — `check_hallucination` prompts the LLM to verify the answer is supported by the context; `rewrite_query` reformulates the original query for re-retrieval when grading or hallucination check fails
 
 ### Success Criteria

@@ -40,11 +40,11 @@ A RAG agent that accurately retrieves grounded answers from the Azure AI Foundry
 ## Context
 
 - **Assessment scope:** Question 1 from `AssessmentQuestion.md` — Agentic RAG prototype, research writeup, QA explanation, and working demo
-- **Document corpus:** ~35 markdown files covering Microsoft Azure AI Foundry Agent Service (setup, concepts, how-to, quickstarts). Also includes `faq.yml` / `foundry-iq-faq.yml` for test case seed Q&A pairs. Images in `documents/media/` are architectural diagrams providing structural context rather than factual data points.
+- **Document corpus:** ~35 markdown files covering Microsoft Azure AI Foundry Agent Service (setup, concepts, how-to, quickstarts). Also includes `faq.yml` / `foundry-iq-faq.yml` for test case seed Q&A pairs. Images in `documents/media/` (recursively including subdirectories) are architectural diagrams processed at ingest time.
 - **Hardware constraints:** RTX 3060 Laptop edition (6 GB VRAM) — model selection must fit within this envelope
 - **Prior experience:** Developer has used ChromaDB before; LangGraph is the chosen agentic orchestration framework
 - **FAQ answer trust:** Answers in `faq.yml` are considered introductory summaries. Ground truth for evaluation will be cross-verified against the actual markdown documents, not taken from the YAML verbatim
-- **Image handling decision:** llava (via Ollama) will generate text summaries of images at ingest time; those summaries become retrievable chunks. This is done at indexing time so runtime stays llama-only (gemma3:4b)
+- **Image handling decision:** `gemma4:e4b` (via Ollama) generates text summaries of all images in `documents/media/` recursively at ingest time; summaries become retrievable chunks. `gemma4:e4b` handles vision natively — no separate llava model needed.
 
 ## Constraints
 
@@ -58,7 +58,7 @@ A RAG agent that accurately retrieves grounded answers from the Azure AI Foundry
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | gemma3:4b as primary LLM | Strong instruction-following in 4B class, fits in 6 GB VRAM, available via Ollama | — Pending |
-| llava for image summarization at ingest time | Images are contextual diagrams; generating summaries at ingest means runtime is text-only and fast | — Pending |
+| `gemma4:e4b` for image summarization at ingest time | Handles vision natively; no separate llava model needed; fits in 6 GB VRAM alongside nomic-embed-text | ✓ Confirmed Phase 2 |
 | LangGraph for agentic flow | Explicit graph-based control over retrieval loop (grade → re-retrieve → generate) gives fine-grained observability | — Pending |
 | ChromaDB for vector store | Developer has prior experience; local persistence, no server needed | — Pending |
 | nomic-embed-text for embeddings | State-of-the-art open embedding model, Ollama-native | — Pending |

@@ -10,7 +10,7 @@
 - [ ] **INGEST-01**: System processes all markdown files in `documents/` (concepts, how-to, quickstarts) recursively
 - [ ] **INGEST-02**: Chunking uses a recursive, markdown-aware splitter that respects headers, code blocks, and tables
 - [ ] **INGEST-03**: Each chunk stores metadata (source file path, section header, chunk index) for citation
-- [ ] **INGEST-04**: Images in `documents/media/` are summarized by llava via Ollama at ingest time and stored as text chunks with source metadata
+- [ ] **INGEST-04**: Images in `documents/media/` (recursively including all subdirectories) are summarized by `gemma4:e4b` via Ollama at ingest time and stored as text chunks with source metadata
 - [ ] **INGEST-05**: `faq.yml` and `concepts/foundry-iq-faq.yml` Q&A pairs are parsed; answers are cross-verified against source markdown docs and used as the evaluation dataset
 - [ ] **INGEST-06**: Embeddings are generated using `nomic-embed-text` via Ollama
 - [ ] **INGEST-07**: Embeddings are stored in a persistent ChromaDB vector store (local disk)
