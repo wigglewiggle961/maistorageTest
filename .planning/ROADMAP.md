@@ -147,10 +147,10 @@
 | # | Phase | Requirements | Plans | Status |
 |---|-------|-------------|-------|--------|
 | 1 | Project Foundation & Environment Setup | 3/3 | Complete   | 2026-04-15 |
-| 2 | Document Ingestion Pipeline | INGEST-01–08 | 5 | Pending |
-| 3 | LangGraph Agentic Retrieval Flow | RAG-01–08 | 5 | Pending |
-| 4 | Streamlit Demo Interface | UI-01–05 | 4 | Pending |
-| 5 | RAGAS Evaluation Harness | EVAL-01–05 | 4 | Pending |
+| 2 | Document Ingestion Pipeline | INGEST-01–08 | 5 | Complete |
+| 3 | LangGraph Agentic Retrieval Flow | RAG-01–08 | 5 | Complete |
+| 4 | Streamlit Demo Interface | UI-01–05 | 3 | Complete |
+| 5 | RAGAS Evaluation Harness | EVAL-01–05 | 4 | Complete |
 | 6 | Documentation & Assessment Writeup | DOC-01 | 4 | Pending |
 
 **Total:** 6 phases | 30 requirements | 26 plans
