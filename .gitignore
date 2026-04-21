@@ -14,8 +14,9 @@ build/
 
 # Generated data — too large and machine-specific for git
 data/chroma_db/
-data/eval_dataset.json
-data/eval_results.json
+data/*.json
+data/*.md
+!data/.gitkeep
 
 # OS
 .DS_Store
@@ -25,3 +26,9 @@ desktop.ini
 # IDE
 .vscode/settings.json
 .idea/
+
+# GSD / AI Assets
+.planning/
+.agent/
+.agents/
+.cursor/
