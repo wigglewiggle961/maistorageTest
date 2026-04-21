@@ -10,9 +10,9 @@ def run_baseline(question: str) -> dict:
     """
     # 1. Retrieve
     vectorstore = ChromaWrapper()
-    docs = vectorstore.similarity_search(query=question, k=config.TOP_K)
+    docs = vectorstore.similarity_search(query=question, k=config.MAX_CONTEXT_CHUNKS)
     
-    # 2. Format Context (MUST match src/agent.py formatting)
+    # 2. Format Context
     formatted_docs = []
     for doc in docs:
         source = doc.metadata.get("source", "unknown")
@@ -31,14 +31,15 @@ def run_baseline(question: str) -> dict:
     )
     
     system_prompt = (
-        "You are a technical assistant answering questions about Azure AI Foundry Agents. "
-        "Use ONLY the provided context blocks to answer the question. "
-        "If the answer is not in the context, say you don't know.\n\n"
-        "Style Requirement: Use inline citations like [1], [2] to reference the context blocks. "
-        "The context blocks are provided in order: the first block is [1], the second is [2], etc. "
-        "YOU MUST cite every block that you use for information. "
-        "DO NOT include a 'Sources' or 'References' section at the end of your response, "
-        "as the UI will handle this automatically."
+        "You are a technical assistant for Azure AI Foundry Agent Service documentation.\n\n"
+        "STRICT RULES:\n"
+        "1. Answer ONLY using the provided context blocks. Do NOT use outside knowledge.\n"
+        "2. If the context does not contain the answer, respond with exactly: "
+        "\"I could not find relevant documentation in the knowledge base.\"\n"
+        "3. Cite sources using [1], [2], etc. where [1] is the first context block, [2] is the second, and so on.\n"
+        "4. Every factual claim must have a citation.\n"
+        "5. Do NOT add a Sources or References section — the UI adds citations automatically.\n\n"
+        "Context blocks follow, numbered in order."
     )
     
     response = llm.invoke([

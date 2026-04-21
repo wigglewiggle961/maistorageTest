@@ -6,8 +6,11 @@ import time
 import logging
 from pathlib import Path
 
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_ollama import ChatOllama, OllamaEmbeddings
 from ragas import evaluate
+from ragas.llms import LangchainLLMWrapper
+from ragas.embeddings import LangchainEmbeddingsWrapper
+from ragas.run_config import RunConfig
 from ragas.metrics import (
     faithfulness,
     answer_relevancy,
@@ -36,20 +39,17 @@ logger = logging.getLogger(__name__)
 
 def build_evaluators():
     """Instantiate local Ollama models as RAGAS judge."""
-    # Use dummy key — Ollama ignores it, but langchain_openai requires it to be set
-    os.environ.setdefault("OPENAI_API_KEY", "ollama")
-
-    llm_judge = ChatOpenAI(
+    # Using Llama 3.1 8B as the judge (proven successful in wagawd project)
+    # This model is much more capable of handling RAGAS reasoning than smaller models.
+    llm_judge = ChatOllama(
         model=LLM_MODEL,
-        base_url=f"{OLLAMA_BASE_URL}/v1",
-        api_key="ollama",
-        temperature=0,
-        timeout=120,  # Guard against slow local inference
+        base_url=OLLAMA_BASE_URL,
+        temperature=0.1,
+        timeout=600,
     )
-    embed_judge = OpenAIEmbeddings(
+    embed_judge = OllamaEmbeddings(
         model=EMBED_MODEL,
-        base_url=f"{OLLAMA_BASE_URL}/v1",
-        api_key="ollama",
+        base_url=OLLAMA_BASE_URL,
     )
     return LangchainLLMWrapper(llm_judge), LangchainEmbeddingsWrapper(embed_judge)
 
@@ -98,7 +98,7 @@ def run_one(item: dict, system: str) -> dict:
         }
 
 def score_with_ragas(rows: list[dict], evaluator_llm, evaluator_embeddings) -> list[dict]:
-    """Run RAGAS scoring on a list of (question, answer, contexts, ground_truth) dicts."""
+    """Calculate RAGAS metrics for a set of results."""
     ragas_data = {
         "user_input": [r["question"] for r in rows],
         "response": [r["answer"] for r in rows],
@@ -106,12 +106,24 @@ def score_with_ragas(rows: list[dict], evaluator_llm, evaluator_embeddings) -> l
         "reference": [r["ground_truth"] for r in rows],
     }
     dataset = Dataset.from_dict(ragas_data)
+    
+    # Apply dev-recommended strictness fix
+    answer_relevancy.strictness = 1
+    
+    # Configure for stable local execution on consumer hardware
+    run_config = RunConfig(
+        max_workers=1,    # Sequential execution prevents VRAM overload/timeouts
+        timeout=600,      # High timeout for slow local inference
+        max_retries=5     # Increased retries for handling parsing hiccups
+    )
 
     result_df = evaluate(
         dataset=dataset,
         metrics=[faithfulness, answer_relevancy, context_precision, context_recall],
         llm=evaluator_llm,
         embeddings=evaluator_embeddings,
+        run_config=run_config,
+        raise_exceptions=False, # Catch errors as NaN for reporting
     ).to_pandas()
 
     scored = []

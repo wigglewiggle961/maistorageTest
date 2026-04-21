@@ -45,6 +45,9 @@ def load_and_chunk_markdown() -> List[Document]:
             # Split by headers first
             header_splits = header_splitter.split_text(content)
             
+            # Tracking chunks within this specific file
+            file_chunk_index = 0
+            
             # Further split long header-based chunks
             for i, split in enumerate(header_splits):
                 # Attach file source metadata
@@ -60,9 +63,10 @@ def load_and_chunk_markdown() -> List[Document]:
                     sub_chunk.metadata.update({
                         "source": rel_path,
                         "section_header": section_header,
-                        "chunk_index": len(all_chunks)
+                        "chunk_index": file_chunk_index
                     })
                     all_chunks.append(sub_chunk)
+                    file_chunk_index += 1
         except Exception as e:
             logger.error(f"Error processing {md_file}: {e}")
 
