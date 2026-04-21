@@ -11,10 +11,12 @@ Built with **LangGraph**, **ChromaDB**, and **Ollama** — fully local, no cloud
 ## What It Does
 
 - Ingests ~35 Azure AI Foundry markdown docs into a persistent ChromaDB vector store
-- Answers questions using an agentic retrieval loop: query routing → retrieval →
-  relevance grading → generation → hallucination check → re-retrieval if needed
-- Demonstrates measurable improvement over naive RAG using **RAGAS** evaluation metrics
-- Provides a **Streamlit** chat interface with citations and agent reasoning trace
+- Answers questions using an agentic retrieval loop: query routing → vector retrieval → 
+  rank-preserving context windowing → LLM relevance grading → generation → 
+  hallucination check → query rewrite & re-retrieval
+- Demonstrates measurable improvement over naive RAG using **RAGAS** evaluation against a manually curated multi-hop QA dataset
+- Features low-latency optimizations including LLM batch processing and VRAM model persistence
+- Provides a **Streamlit** chat interface with citations and an agent reasoning trace
 
 ---
 
@@ -83,19 +85,7 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-To pin exact versions after install (recommended for reproducibility):
-
-```powershell
-pip freeze > requirements.txt
-```
-
 ### 4. Configure Environment (Optional)
-
-Copy `.env.example` to `.env` and adjust if needed:
-
-```powershell
-Copy-Item .env.example .env
-```
 
 The defaults work with a standard local Ollama installation. You only need to edit
 `.env` if your Ollama runs on a non-standard port or you want to swap models.
@@ -135,8 +125,7 @@ Build the ChromaDB vector store from the `documents/` corpus:
 python scripts/ingest.py
 ```
 
-> **First run:** Ingestion takes 5–20 minutes (image understanding uses `gemma4:e4b`'s
-> native vision — no llava required).
+> **First run:** Ingestion takes 5–20 minutes (image understanding uses `gemma4:e4b`'s)
 
 ### Step 2: Launch the Demo
 
@@ -153,22 +142,29 @@ Open [http://localhost:8501](http://localhost:8501) in your browser.
 
 ## Project Structure
 
-```
+```text
 .
 ├── src/                    # Core source modules
-│   └── config.py           # Central config (paths, model names, env vars)
+│   ├── agent.py            # LangGraph agentic retrieval workflow
+│   ├── baseline.py         # Naive RAG baseline for evaluation comparison
+│   ├── config.py           # Central config (paths, model names, env vars)
+│   ├── faq_parser.py       # Helper for extracting QA pairs from source docs
+│   ├── ingestion.py        # Markdown parsing, image summarization, chunking
+│   └── vectorstore.py      # ChromaDB wrapper
 ├── scripts/                # Runnable entry points
 │   ├── verify_models.py    # Ollama health check  ← start here
-│   ├── ingest.py           # Document ingestion (Phase 2)
-│   └── evaluate.py         # RAGAS evaluation (Phase 5)
-├── tests/                  # Tests
+│   ├── ingest.py           # Document ingestion
+│   ├── validate_dataset.py # QA dataset curation tool
+│   ├── evaluate.py         # RAGAS evaluation runner
+│   └── report.py           # Formats RAGAS results into markdown
 ├── data/                   # Generated at runtime (gitignored)
-│   └── chroma_db/          # ChromaDB persistent store
-├── docs/                   # Written documentation (Phase 6)
+│   ├── chroma_db/          # ChromaDB persistent store
+│   ├── eval_dataset_v4.json# evaluation dataset
+│   └── ingestion_cache.json# Cache for LLM-based image summaries
+├── docs/                   # Written documentation
 ├── documents/              # Source corpus (Azure AI Foundry docs — static)
-├── app.py                  # Streamlit demo (Phase 4)
+├── app.py                  # Streamlit demo
 ├── requirements.txt        # Pinned Python dependencies
-├── .env.example            # Environment variable template
 └── README.md               # This file
 ```
 
@@ -186,12 +182,14 @@ See `.env.example` for all available settings:
 | `VISION_MODEL` | `gemma4:e4b` | Vision model — same as LLM (native multimodal) |
 | `TOP_K` | `5` | Number of chunks to retrieve |
 | `MAX_RETRIES` | `3` | Max re-retrieval attempts |
+| `WINDOW_TOP_K` | `2` | Number of top retrieved chunks to expand with context windowing |
+| `MAX_CONTEXT_CHUNKS` | `5` | Hard cap on final context chunks sent to the generator |
 
 ---
 
 ## Evaluation
 
-To measure retrieval quality against the FAQ-derived test set:
+To measure retrieval quality and complex reasoning against the evaluation dataset (`eval_dataset_v4.json`):
 
 ```powershell
 python scripts/evaluate.py
@@ -219,8 +217,7 @@ ollama serve
 
 **GPU out of memory:**
 
-`gemma4:e4b` is the only large model used. If you see OOM errors, verify no other large
-models are loaded: `ollama ps`. Stop unused models with `ollama stop <model>`.
+`gemma4:e4b` is the only large model used. If you see OOM errors, verify no other large models are loaded: `ollama ps`. Stop unused models with `ollama stop <model>`.
 
 **ChromaDB errors on re-run:**
 
