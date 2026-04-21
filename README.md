@@ -161,7 +161,6 @@ Open [http://localhost:8501](http://localhost:8501) in your browser.
 │   ├── chroma_db/          # ChromaDB persistent store
 │   ├── eval_dataset_v4.json# evaluation dataset
 │   └── ingestion_cache.json# Cache for LLM-based image summaries
-├── docs/                   # Written documentation
 ├── documents/              # Source corpus (Azure AI Foundry docs — static)
 ├── app.py                  # Streamlit demo
 ├── requirements.txt        # Pinned Python dependencies
@@ -196,14 +195,6 @@ python scripts/evaluate.py
 ```
 
 Results are written to `data/eval_report.md` and `data/eval_results.json`.
-
----
-
-## Documentation
-
-- [`docs/research.md`](docs/research.md) — Traditional vs Agentic RAG: design rationale
-- [`docs/system-design.md`](docs/system-design.md) — LangGraph node-by-node architecture
-- [`docs/qa-methodology.md`](docs/qa-methodology.md) — RAGAS metrics and evaluation approach
 
 ---
 
