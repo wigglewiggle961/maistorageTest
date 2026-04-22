@@ -18,6 +18,13 @@ data/chroma_db/
 data/*.json
 data/*.md
 !data/.gitkeep
+!data/eval_dataset_v3.json
+!data/eval_dataset_v4.json
+!data/eval_report_v3.md
+!data/eval_report_v4.md
+!data/eval_results_v3.json
+!data/eval_results_v4.json
+!data/ingestion_cache.json
 
 # OS
 .DS_Store
@@ -33,3 +40,7 @@ desktop.ini
 .agent/
 .agents/
 .cursor/
+GEMINI.md
+
+# Documentation
+docs/

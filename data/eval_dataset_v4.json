@@ -1,0 +1,53 @@
+[
+  {
+    "question": "Im trying to deploy a hosted agent in italy north and it uses file search. I heard cold starts can be bad so how do I turn those off? Also is italy north even allowed for this?",
+    "ground_truth": "To avoid cold starts, you must configure your hosted agent with at least one warm replica by setting `--min-replicas 1`. However, Italy North is not a valid region for this setup because the File Search tool is not supported in the Italy North region.",
+    "source_file": "documents/concepts/hosted-agents.md, documents/concepts/limits-quotas-regions.md",
+    "source_chunks": [
+      "> - The first request after scaling to zero incurs a cold start. To avoid cold starts, keep at least one warm replica by setting `--min-replicas 1` (or higher), trading steady-state cost for lower latency.",
+      "Not all tools are available in every region. For example, file search isn't available in Italy North and Brazil South."
+    ],
+    "verified": true
+  },
+  {
+    "question": "my agent could connect to azure storage fine while I was developing but as soon as I published it Im getting unauthorized errors everywhere. tool connection audience is definitely https://storage.azure.com so what gives?? how do i fix",
+    "ground_truth": "When an agent is published, it transitions from using the 'shared project identity' to a 'distinct agent identity' with a new `agentIdentityId`. The 'Unauthorized' error occurs because RBAC roles do not automatically carry over. You must explicitly assign the required RBAC role (e.g., Storage Blob Data Contributor) to the new distinct agent identity.",
+    "source_file": "documents/concepts/agent-identity.md",
+    "source_chunks": [
+      "Confirm you granted permissions to the current identity used by the agent (shared project identity for unpublished agents, distinct identity for published agents).",
+      "When you publish an agent, it receives a new distinct `agentIdentityId`. Repeat these role assignments for the new identity. The shared project identity roles don't carry over to the published agent's identity."
+    ],
+    "verified": true
+  },
+  {
+    "question": "migrating python assistant from classic foundry... old way used threads, runs, and the project client. whats the new way to handle conversations and run execution?",
+    "ground_truth": "In the new Foundry Agent Service, Threads are replaced by Conversations, and Runs are replaced by Responses. Furthermore, for managing conversations and responses in Python, you must use the OpenAI client obtained via `project.get_openai_client()`, rather than the project client used for agent creation.",
+    "source_file": "documents/how-to/migrate.md",
+    "source_chunks": [
+      "| Threads | Conversations | Supports streams of items, not just messages. |",
+      "| Runs | Responses | Responses send input items or use a conversation object and receive output items. Tool call loops are explicitly managed. |",
+      "> [!IMPORTANT]\n> In the new API, the conversations and responses APIs use the **OpenAI client** (or its language equivalent). In Python, call `project.get_openai_client()`."
+    ],
+    "verified": true
+  },
+  {
+    "question": "Im dumping a 2,000,000 character string into a single message to my agent and it crashes. what limit did I hit? how can i bypass this",
+    "ground_truth": "You are hitting the `content_size_exceeded` error because the maximum size of `text` content per message is 1,500,000 characters. To work around this, you should move the large content into uploaded files and use the File Search tool instead of sending it directly in the message.",
+    "source_file": "documents/concepts/limits-quotas-regions.md",
+    "source_chunks": [
+      "| Maximum size of `text` content per message | 1,500,000 characters |",
+      "| Message content too large | 400 | `content_size_exceeded` | Use file search for large content |",
+      "**Message content size.** Creating a message can fail if the `text` content is too large. Send smaller messages, or move large content into files and use file search."
+    ],
+    "verified": true
+  },
+  {
+    "question": "setting up mcp server and an a2a endpoint connection. need to use agent identity for auth. what are the exact auth type values for each?",
+    "ground_truth": "To authenticate via agent identity, you must use `AgenticIdentityToken` for the MCP server and `AgenticIdentity` for the A2A endpoint.",
+    "source_file": "documents/concepts/agent-identity.md",
+    "source_chunks": [
+      "| Tool type | Auth type value | Connection category |\n| --- | --- | --- |\n| MCP server | `AgenticIdentityToken` | `RemoteTool` |\n| A2A endpoint | `AgenticIdentity` | `RemoteA2A` |"
+    ],
+    "verified": true
+  }
+]
